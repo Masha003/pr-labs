@@ -1,22 +1,92 @@
-import { fetchProductData, fetchAdditionalData } from "./services/fetchService";
-import { validateProduct } from "./utils/validation";
+import axios from "axios";
+import * as cheerio from "cheerio";
+import { Product } from "./models/Product";
 
-async function main() {
-  //   const url = "https://www.asos.com/women/tops/cat/?cid=4169"; // Example ASOS category page
-  const url = "https://makeup.md/categorys/324237/";
+const MDL_TO_EUR = 0.051;
 
-  // Step 1: Fetch product data from ASOS webpage
-  let products = await fetchProductData(url);
+const productData: Product[] = [];
 
-  // Step 2: Validate the products and fetch additional data for valid ones
-  products = await Promise.all(
-    products
-      .filter(validateProduct) // Filter out invalid products
-      .map(fetchAdditionalData)
-  ); // Fetch additional data for valid products
+async function scrapeProduct(url: string) {
+  try {
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
 
-  // Log the final list of products
-  console.log(products);
+    const productId = $("div.article-id strong").text().trim();
+
+    return productId ? productId : null;
+  } catch (error) {
+    console.error(`Error scraping the product details: ${error}`);
+    return null;
+  }
 }
 
-main();
+async function scrapeWebsite(url: string) {
+  try {
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
+
+    const products = $("figure.card-product").toArray();
+
+    for (const el of products) {
+      const productName = $(el).find("div.title a").text().trim();
+      const productPriceText = $(el).find("span.price-new").text().trim();
+      const productLink = $(el).find("div.title a").attr("href");
+
+      // First validation
+      if (!productName) {
+        console.error("Invalid product name, skipping...");
+        continue;
+      }
+
+      // Second validation
+      const productPrice = parseFloat(productPriceText.replace(/[^\d.-]/g, "")); // Remove non-numeric characters
+      if (isNaN(productPrice)) {
+        console.error("Invalid product price, skipping...");
+        continue;
+      }
+
+      if (productLink) {
+        const productId = await scrapeProduct(productLink); // Wait for this product scraping to finish
+        if (productId) {
+          productData.push({
+            name: productName,
+            price: productPrice,
+            link: productLink,
+            id: productId,
+          });
+        } else {
+          console.error("Invalid product ID, skipping...");
+        }
+      }
+    }
+
+    const mappedProducts = productData.map((product) => ({
+      ...product,
+      price: product.price * MDL_TO_EUR,
+    }));
+
+    const minPriceEUR = 100; // Minimum price in EUR
+    const maxPriceEUR = 500; // Maximum price in EUR
+    const filteredProducts = mappedProducts.filter(
+      (product) => product.price >= minPriceEUR && product.price <= maxPriceEUR
+    );
+
+    const totalSum = filteredProducts.reduce(
+      (sum, product) => sum + product.price,
+      0
+    );
+
+    const finalData = {
+      timestamp: new Date().toUTCString(),
+      totalSum,
+      products: filteredProducts,
+    };
+
+    console.log("Final Scraped Product Data:", finalData);
+  } catch (error) {
+    console.error(`Error scraping the website: ${error}`);
+  }
+}
+
+const url = "https://darwin.md/laptopuri/personale";
+scrapeWebsite(url);
