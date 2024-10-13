@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+
 import { Product } from "./models/Product";
 
 const MDL_TO_EUR = 0.051;
@@ -88,5 +89,5 @@ async function scrapeWebsite(url: string) {
   }
 }
 
-const url = "https://darwin.md/laptopuri/personale";
+const url = "https://darwin.md/laptopuri/";
 scrapeWebsite(url);
