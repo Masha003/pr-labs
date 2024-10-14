@@ -8,6 +8,38 @@ const MDL_TO_EUR = 0.051;
 
 const productData: Product[] = [];
 
+// Function to serialize products to JSON
+function serializeToJson(products: Product[], totalSum: number): string {
+  return JSON.stringify(
+    {
+      timestamp: new Date().toUTCString(),
+      totalSum: totalSum,
+      products,
+    },
+    null,
+    2
+  );
+}
+
+// Function to serialize products to XML
+function serializeToXml(products: Product[], totalSum: number): string {
+  let xml = `<products timestamp="${new Date().toUTCString()}">`;
+  xml += `\n <total>${totalSum}</total>`;
+
+  products.forEach((product) => {
+    xml += `
+    <product>
+      <name>${product.name}</name>
+      <price>${product.price}</price>
+      <link>${product.link}</link>
+      <id>${product.id}</id>
+    </product>`;
+  });
+
+  xml += `\n</products>`;
+  return xml;
+}
+
 async function scrapeProduct(url: string) {
   try {
     const response = await axios.get(url);
@@ -152,7 +184,16 @@ async function scrapeWebsite(body: string) {
       products: filteredProducts,
     };
 
-    console.log("Final Scraped Product Data:", finalData);
+    // console.log("Final Scraped Product Data:", finalData);
+    console.log(
+      "JSON Serialized Data:\n",
+      serializeToJson(filteredProducts, totalSum)
+    );
+    // console.log("JSON Serialized Data:\n", JSON.stringify(finalData, null, 2));
+    console.log(
+      "XML Serialized Data:\n",
+      serializeToXml(filteredProducts, totalSum)
+    );
   } catch (error) {
     console.error(`Error scraping the website: ${error}`);
   }
