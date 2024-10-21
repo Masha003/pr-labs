@@ -9,16 +9,36 @@ const MDL_TO_EUR = 0.051;
 const productData: Product[] = [];
 
 // Function to serialize products to JSON
-function serializeToJson(products: Product[], totalSum: number): string {
-  return JSON.stringify(
-    {
-      timestamp: new Date().toUTCString(),
-      totalSum: totalSum,
-      products,
-    },
-    null,
-    2
-  );
+// function serializeToJson(products: Product[], totalSum: number): string {
+//   return JSON.stringify(
+//     {
+//       timestamp: new Date().toUTCString(),
+//       totalSum: totalSum,
+//       products,
+//     },
+//     null,
+//     2
+//   );
+// }
+
+function manualSerializeToJson(products: Product[], totalSum: number): string {
+  let json = "{\n";
+  json += `  "timestamp": "${new Date().toUTCString()}",\n`;
+  json += `  "totalSum": ${totalSum},\n`;
+  json += '  "products": [\n';
+
+  products.forEach((product, index) => {
+    json += "    {\n";
+    json += `      "name": "${product.name}",\n`;
+    json += `      "price": ${product.price},\n`;
+    json += `      "link": "${product.link}",\n`;
+    json += `      "id": "${product.id}"\n`;
+    json += index < products.length - 1 ? "    },\n" : "    }\n";
+  });
+
+  json += "  ]\n";
+  json += "}";
+  return json;
 }
 
 // Function to serialize products to XML
@@ -38,6 +58,101 @@ function serializeToXml(products: Product[], totalSum: number): string {
 
   xml += `\n</products>`;
   return xml;
+}
+
+function customSerialize(data: any): string {
+  if (Array.isArray(data)) {
+    return `L:[${data.map(customSerialize).join("; ")}]`;
+  } else if (typeof data === "object" && data !== null) {
+    const entries = Object.entries(data).map(
+      ([key, value]) => `D:k:str(${key}):v:${customSerialize(value)}`
+    );
+    return entries.join("; ");
+  } else if (typeof data === "string") {
+    return `str(${data})`;
+  } else if (typeof data === "number") {
+    return `int(${data})`;
+  } else if (typeof data === "boolean") {
+    return `bool(${data})`;
+  } else if (data === null) {
+    return "null()";
+  }
+  throw new Error(`Unsupported data type: ${typeof data}`);
+}
+
+// Function to deserialize custom format back to data
+function customDeserialize(serializedData: string): any {
+  // Handle list deserialization
+  if (serializedData.startsWith("L:[")) {
+    const listContent = serializedData.slice(3, -1); // Remove L:[ and ]
+    const items = listContent.split(/;\s*/); // Split by ';' with optional spaces
+    const result: any[] = [];
+    let tempObject: any = {};
+
+    items.forEach((item) => {
+      const deserializedItem = customDeserialize(item);
+
+      // If it's a dictionary entry, add it to the current object
+      if (
+        typeof deserializedItem === "object" &&
+        !Array.isArray(deserializedItem)
+      ) {
+        tempObject = { ...tempObject, ...deserializedItem };
+
+        // If object is complete (contains all expected fields), push it to the result
+        if (
+          tempObject.name &&
+          tempObject.price !== undefined &&
+          tempObject.link &&
+          tempObject.id
+        ) {
+          result.push(tempObject);
+          tempObject = {}; // Reset for the next object
+        }
+      } else {
+        result.push(deserializedItem);
+      }
+    });
+
+    return result;
+  }
+
+  // Handle dictionary deserialization
+  if (serializedData.startsWith("D:")) {
+    const keyMatch = serializedData.match(/k:str\(([^)]+)\)/);
+    const valueMatch = serializedData.match(/v:(.+)/);
+    const obj: Record<string, any> = {};
+
+    if (keyMatch && valueMatch) {
+      const key = keyMatch[1];
+      const value = customDeserialize(valueMatch[1]);
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  // Handle string deserialization
+  if (serializedData.startsWith("str(")) {
+    return serializedData.slice(4, -1); // Remove str( and )
+  }
+
+  // Handle number deserialization
+  if (serializedData.startsWith("int(")) {
+    return parseInt(serializedData.slice(4, -1), 10); // Remove int( and )
+  }
+
+  // Handle boolean deserialization
+  if (serializedData.startsWith("bool(")) {
+    return serializedData.slice(5, -1) === "true"; // Remove bool( and )
+  }
+
+  // Handle null deserialization
+  if (serializedData === "null()") {
+    return null;
+  }
+
+  throw new Error(`Unsupported serialized data: ${serializedData}`);
 }
 
 async function scrapeProduct(url: string) {
@@ -187,16 +302,29 @@ async function scrapeWebsite(body: string) {
     // console.log("Final Scraped Product Data:", finalData);
     console.log(
       "JSON Serialized Data:\n",
-      serializeToJson(filteredProducts, totalSum)
+      manualSerializeToJson(filteredProducts, totalSum)
     );
     // console.log("JSON Serialized Data:\n", JSON.stringify(finalData, null, 2));
     console.log(
       "XML Serialized Data:\n",
       serializeToXml(filteredProducts, totalSum)
     );
+
+    const customSerialization = customSerialize(filteredProducts);
+    console.log("Cusom serialization:\n", customSerialization);
+
+    console.log(
+      "Custom deserialization:\n",
+      customDeserialize(customSerialization)
+    );
   } catch (error) {
     console.error(`Error scraping the website: ${error}`);
   }
+}
+
+function extractBody(rawResponse: string): string {
+  const bodyStart = rawResponse.indexOf("\r\n\r\n") + 4;
+  return rawResponse.slice(bodyStart);
 }
 
 const url = "https://darwin.md/laptopuri/";
@@ -220,11 +348,6 @@ const options = {
   rejectUnauthorized: false, // Disable for now (only for testing)
   minVersion: "TLSv1.2" as tls.SecureVersion, // Correct typing for minVersion
 };
-
-function extractBody(rawResponse: string): string {
-  const bodyStart = rawResponse.indexOf("\r\n\r\n") + 4;
-  return rawResponse.slice(bodyStart);
-}
 
 const socket = tls.connect(options, () => {
   console.log(`Connected to ${host}:${port}`);
