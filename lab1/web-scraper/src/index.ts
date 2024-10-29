@@ -157,7 +157,7 @@ async function scrapeProduct(url: string) {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
 
-    const productId = $("div.article-id strong").text().trim();
+    const productId = $("div.text-start span.color-green").text().trim();
 
     return productId ? productId : null;
   } catch (error) {
@@ -238,13 +238,20 @@ async function scrapeWebsite(body: string) {
   try {
     // const response = await axios.get(url);
     const $ = cheerio.load(body);
-
-    const products = $("figure.card-product").toArray();
+    const products = $(
+      "div.product-items-5.mt-3.ga-list div.product-card"
+    ).toArray();
 
     for (const el of products) {
-      const productName = $(el).find("div.title a").text().trim();
-      const productPriceText = $(el).find("span.price-new").text().trim();
-      const productLink = $(el).find("div.title a").attr("href");
+      const productName = $(el)
+        .find("div.title-product.fs-16.lh-19.mb-sm-2")
+        .text()
+        .trim();
+      const productPriceText = $(el)
+        .find("div.price-new.fw-600.fs-16.lh-19.align-self-end")
+        .text()
+        .trim();
+      const productLink = $("a.product-link").attr("href");
 
       // First validation
       if (!productName) {
@@ -296,7 +303,7 @@ async function scrapeWebsite(body: string) {
       products: filteredProducts,
     };
 
-    // console.log("Final Scraped Product Data:", finalData);
+    console.log("Final Scraped Product Data:", finalData);
     console.log(
       "JSON Serialized Data:\n",
       manualSerializeToJson(filteredProducts, totalSum)
@@ -317,6 +324,7 @@ async function scrapeWebsite(body: string) {
   } catch (error) {
     console.error(`Error scraping the website: ${error}`);
   }
+  // console.log(productData);
 }
 
 function extractBody(rawResponse: string): string {
