@@ -82,24 +82,21 @@ function customSerialize(data: any): string {
 
 // Function to deserialize custom format back to data
 function customDeserialize(serializedData: string): any {
-  // Handle list deserialization
   if (serializedData.startsWith("L:[")) {
-    const listContent = serializedData.slice(3, -1); // Remove L:[ and ]
-    const items = listContent.split(/;\s*/); // Split by ';' with optional spaces
+    const listContent = serializedData.slice(3, -1);
+    const items = listContent.split(/;\s*/);
     const result: any[] = [];
     let tempObject: any = {};
 
     items.forEach((item) => {
       const deserializedItem = customDeserialize(item);
 
-      // If it's a dictionary entry, add it to the current object
       if (
         typeof deserializedItem === "object" &&
         !Array.isArray(deserializedItem)
       ) {
         tempObject = { ...tempObject, ...deserializedItem };
 
-        // If object is complete (contains all expected fields), push it to the result
         if (
           tempObject.name &&
           tempObject.price !== undefined &&
@@ -107,7 +104,7 @@ function customDeserialize(serializedData: string): any {
           tempObject.id
         ) {
           result.push(tempObject);
-          tempObject = {}; // Reset for the next object
+          tempObject = {};
         }
       } else {
         result.push(deserializedItem);
@@ -144,7 +141,7 @@ function customDeserialize(serializedData: string): any {
 
   // Handle boolean deserialization
   if (serializedData.startsWith("bool(")) {
-    return serializedData.slice(5, -1) === "true"; // Remove bool( and )
+    return serializedData.slice(5, -1) === "true";
   }
 
   // Handle null deserialization
