@@ -3,8 +3,12 @@ const Product = require("../models/product");
 // CRUD Controllers
 
 //get all products
+// with pagination
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+
+  Product.findAll({ limit: limit, offset: offset })
     .then((products) => {
       res.status(200).json({ products: products });
     })

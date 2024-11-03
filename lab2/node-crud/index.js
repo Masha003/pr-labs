@@ -14,6 +14,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// test connection
 app.get("/", (req, res, next) => {
   res.send("Hello World");
 });
