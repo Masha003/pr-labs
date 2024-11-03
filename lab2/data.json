@@ -1,0 +1,48 @@
+{
+  "timestamp": "Fri, 01 Nov 2024 15:02:00 GMT",
+  "totalSum": 2653.53,
+  "products": [
+    {
+      "name": "Laptop Lenovo IdeaPad Slim 3 15AMN8 Arctic Gray",
+      "price": 402.39,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Lenovo IdeaPad 3 15IAU7-QNRK Arctic Gray",
+      "price": 320.78999999999996,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Asus Vivobook Go 15 E1504FA-BQ210 Mixed Black",
+      "price": 341.19,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Asus Vivobook Go 15 E1504FA-BQ832W Mixed Black",
+      "price": 483.98999999999995,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Asus Vivobook Go 15 E1504FA-BQ090 Mixed Black",
+      "price": 432.98999999999995,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Lenovo IdeaPad Slim 3 15IAN8 Arctic Gray",
+      "price": 336.09,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    },
+    {
+      "name": "Laptop Asus Vivobook Go 15 E1504GA Mixed Black",
+      "price": 336.09,
+      "link": "https://darwin.md/macbook-air-13-2020-apple-space-gray-mgn63rua.html",
+      "id": "00-00050235-007"
+    }
+  ]
+}
