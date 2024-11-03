@@ -7,6 +7,9 @@ services:
     image: crud_node_app
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app # Mounts the project directory
+      - ./uploads:/app/uploads # Mounts the 'uploads' folder to a local folder
     environment:
       - PG_DB=node_live_db
       - PG_USER=user

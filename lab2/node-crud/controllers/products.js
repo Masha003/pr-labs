@@ -1,5 +1,8 @@
 const Product = require("../models/product");
 
+const fs = require("fs");
+const path = require("path");
+
 // CRUD Controllers
 
 //get all products
@@ -96,4 +99,35 @@ exports.deleteProduct = (req, res, next) => {
       res.status(200).json({ message: "Product deleted!" });
     })
     .catch((err) => console.log(err));
+};
+
+// Controller for file upload
+exports.uploadFile = (req, res, next) => {
+  // Check if file is present
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  // File details
+  const filePath = path.join(__dirname, "../", req.file.path);
+  console.log("Uploaded file path:", filePath);
+
+  // Read the file and parse JSON data
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Error reading file", error: err });
+    }
+
+    try {
+      // const jsonData = JSON.parse(data);
+      res.status(200).json({
+        message: "File uploaded and parsed successfully",
+        data: data,
+      });
+    } catch (err) {
+      res.status(400).json({ message: "Smth frong with file", error: err });
+    }
+  });
 };
