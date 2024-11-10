@@ -14,7 +14,7 @@ import (
 
 var (
     mu       sync.Mutex
-    filePath = "data.txt" // Shared file to be accessed by threads
+    filePath = "data.txt"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
             fmt.Println("Error accepting connection:", err)
             continue
         }
-        go handleClient(conn) // Start a goroutine for each client
+        go handleClient(conn)
     }
 
 }
@@ -67,14 +67,12 @@ func handleClient(conn net.Conn) {
             conn.Write([]byte("Unknown command\n"))
 		}
 
-		// Random sleep time between 1 and 7 seconds
         time.Sleep(time.Duration(rand.Intn(7)+1) * time.Second)
 
 	}
 
 }
 
-// handleWrite writes data to the shared file with safe locking
 func handleWrite(data string) {
     mu.Lock()
     defer mu.Unlock()
@@ -95,7 +93,6 @@ func handleWrite(data string) {
     }
 }
 
-// handleRead reads data from the shared file with safe locking
 func handleRead() string {
     mu.Lock()
     defer mu.Unlock()
