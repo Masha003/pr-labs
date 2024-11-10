@@ -31,11 +31,6 @@ exports.getProduct = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
-//     name: string;
-//     price: number;
-//     link: string;
-//     id: string;
-
 //create product
 exports.createProduct = (req, res, next) => {
   const name = req.body.name;
@@ -103,12 +98,10 @@ exports.deleteProduct = (req, res, next) => {
 
 // Controller for file upload
 exports.uploadFile = (req, res, next) => {
-  // Check if file is present
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  // File details
   const filePath = path.join(__dirname, "../", req.file.path);
   console.log("Uploaded file path:", filePath);
 
@@ -121,10 +114,10 @@ exports.uploadFile = (req, res, next) => {
     }
 
     try {
-      // const jsonData = JSON.parse(data);
+      const jsonData = JSON.parse(data);
       res.status(200).json({
         message: "File uploaded and parsed successfully",
-        data: data,
+        data: jsonData,
       });
     } catch (err) {
       res.status(400).json({ message: "Smth frong with file", error: err });
