@@ -123,7 +123,7 @@ wss.on("connection", (ws) => {
           message: `${ws.username} has left the room`,
         });
         clients.delete(ws);
-        ws.close();
+        // ws.close();
         break;
       default:
         ws.send(JSON.stringify({ type: "error", message: "Unknown command" }));
