@@ -80,6 +80,8 @@ console.log("WebSocket server running on port 8080");
 
 // Chat Room Logic
 const clients = new Set(); // Track connected clients
+const recentMessages = [];
+
 const broadcast = (data) => {
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -91,6 +93,8 @@ const broadcast = (data) => {
 wss.on("connection", (ws) => {
   clients.add(ws);
   console.log("New client connected");
+
+  recentMessages.forEach((msg) => ws.send(JSON.stringify(msg)));
 
   // Handle incoming messages
   ws.on("message", (message) => {
@@ -104,11 +108,14 @@ wss.on("connection", (ws) => {
         });
         break;
       case "send_msg":
-        broadcast({
+        const chatMessage = {
           type: "chat",
           user: parsedMessage.user,
           message: parsedMessage.message,
-        });
+        };
+        recentMessages.push(chatMessage); // Store the message temporarily
+        if (recentMessages.length > 10) recentMessages.shift(); // Keep only the last 10 messages
+        broadcast(chatMessage);
         break;
       case "leave_room":
         broadcast({
