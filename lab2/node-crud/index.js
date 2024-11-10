@@ -25,55 +25,6 @@ app.get("/", (req, res, next) => {
 //CRUD routes
 app.use("/products", require("./routes/routes"));
 
-// // WebSocket server setup
-// const wss = new WebSocket.Server({ port: 8080 });
-// console.log("WebSocket server running on port 8080");
-
-// // Chat Room Logic
-// const clients = new Set(); // Track connected clients
-// const broadcast = (data) => {
-//   clients.forEach((client) => {
-//     if (client.readyState === WebSocket.OPEN) {
-//       client.send(JSON.stringify(data));
-//     }
-//   });
-// };
-
-// wss.on("connection", (ws) => {
-//   clients.add(ws);
-//   console.log("New client connected");
-
-//   // Handle incoming messages
-//   ws.on("message", (message) => {
-//     const parsedMessage = JSON.parse(message);
-//     switch (parsedMessage.type) {
-//       case "join_room":
-//         ws.send(JSON.stringify({ type: "info", message: "Joined the room" }));
-//         break;
-//       case "send_msg":
-//         broadcast({
-//           type: "chat",
-//           user: parsedMessage.user,
-//           message: parsedMessage.message,
-//         });
-//         break;
-//       case "leave_room":
-//         ws.send(JSON.stringify({ type: "info", message: "Left the room" }));
-//         clients.delete(ws);
-//         ws.close();
-//         break;
-//       default:
-//         ws.send(JSON.stringify({ type: "error", message: "Unknown command" }));
-//     }
-//   });
-
-//   // Handle client disconnection
-//   ws.on("close", () => {
-//     clients.delete(ws);
-//     console.log("Client disconnected");
-//   });
-// });
-
 // WebSocket server setup
 const wss = new WebSocket.Server({ port: 8080 });
 console.log("WebSocket server running on port 8080");
