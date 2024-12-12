@@ -1,7 +1,7 @@
-port: 9001
-node_id: "node2"
+port: 9081
+heartbeat_interval: 5s
+leader_heartbeat_timeout: 8s
+node: localhost:9081
 peers:
-  - "127.0.0.1:9000"
-  - "127.0.0.1:9002"
-election_timeout: 3000 # in milliseconds
-heartbeat_interval: 1000 # in milliseconds
+  - localhost:9080
+  - localhost:9082

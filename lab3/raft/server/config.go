@@ -1,29 +1,11 @@
 package server
 
-import (
-	"io/ioutil"
-
-	"gopkg.in/yaml.v2"
-)
+import "time"
 
 type Config struct {
-	Port       int      `yaml:"port"`
-	Peers      []string `yaml:"peers"`
-	NodeID     string   `yaml:"node_id"`
-	ElectionTimeout int  `yaml:"election_timeout"`
-	HeartbeatInterval int `yaml:"heartbeat_interval"`
-}
-
-func LoadConfig(filePath string) (*Config, error) {
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg := &Config{}
-	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
+	Port                   int           `yaml:"port"`
+	HeartbeatInterval      time.Duration `yaml:"heartbeat_interval"`
+	LeaderHeartbeatTimeout time.Duration `yaml:"leader_heartbeat_timeout"`
+	Node                   string        `yaml:"node"`
+	Peers                  []string      `yaml:"peers"`
 }

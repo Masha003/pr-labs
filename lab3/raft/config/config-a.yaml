@@ -1,7 +1,12 @@
-port: 9000
-node_id: "node1"
+port: 9080
+# Leader node will send out heartbeats to fellow peers 
+heartbeat_interval: 5s
+# Followers will continue to monitor heartbeats from leaders
+# If no heartbeat is received it triggers leader elecation
+leader_heartbeat_timeout: 6s
+# node identifier
+node: localhost:9080
+# peer-identifiers
 peers:
-  - "127.0.0.1:9001"
-  - "127.0.0.1:9002"
-election_timeout: 3000 # in milliseconds
-heartbeat_interval: 1000 # in milliseconds
+  - localhost:9081
+  - localhost:9082
