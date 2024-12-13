@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  node_db:
+    container_name: node_db
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: node_live_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - node_db_data:/var/lib/postgresql/data
+
+  node_app: # LAB2 Webserver
+    container_name: node_app
+    build: ./lab2
+    image: crud_node_app
+    ports:
+      - "3000:3000" # HTTP server
+    volumes:
+      - ./lab2:/app
+      - ./lab2/uploads:/app/uploads
+    environment:
+      PG_DB: node_live_db
+      PG_USER: user
+      PG_PASSWORD: 12345
+      PG_HOST: node_db
+    restart: always
+    depends_on:
+      - node_db
+
+  manager_consumer:
+    build: ./manager
+    container_name: manager_consumer
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      LAB2_URL: http://node_app:3000/products
+    depends_on:
+      - rabbitmq
+      - node_app
+
+  scraper: # LAB1 (Publisher)
+    build: ./lab1
+    container_name: scraper
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    depends_on:
+      - rabbitmq
+
+  ftp_server:
+    image: delfer/alpine-ftp-server
+    container_name: ftp_server
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    environment:
+      USERS: "testuser|testpass"
+      ADDRESS: "0.0.0.0"
+    volumes:
+      - ./ftp_data:/home/testuser
+
+volumes:
+  node_db_data: {}

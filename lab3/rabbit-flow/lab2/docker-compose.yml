@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  node_app:
+    container_name: node_app
+    build: .
+    image: crud_node_app
+    ports:
+      - "3000:3000" # HTTP server
+    volumes:
+      - .:/app # Mounts the project directory
+      - ./uploads:/app/uploads # Mounts the 'uploads' folder to a local folder
+    environment:
+      - PG_DB=node_live_db
+      - PG_USER=user
+      - PG_PASSWORD=12345
+      - PG_HOST=node_db
+    restart: always
+    depends_on:
+      - node_db
+
+  node_db:
+    container_name: node_db
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=node_live_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - node_db_data:/var/lib/postgresql/data
+
+volumes:
+  node_db_data: {}
